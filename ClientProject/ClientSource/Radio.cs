@@ -54,20 +54,19 @@ namespace BarotraumaRadio.ClientSource
                 if (powered == null)
                 {
                     LuaCsSetup.PrintCsError($"Error Getting power component");
+                    return;
                 }
-                if (radioEnabled == value || powered != null && !powered.HasPower)
+                if ((!powered.HasPower || !value) && radioEnabled)
+                {
+                    radioEnabled = false;
+                    Stop();
+                }
+                if (radioEnabled == value || !powered.HasPower)
                 {
                     return;
                 }
                 radioEnabled = value;
-                if (value)
-                {
-                    new Thread(Play).Start();
-                }
-                else
-                {
-                    Stop();
-                }
+                new Thread(Play).Start();
             }
         }
 
@@ -90,8 +89,6 @@ namespace BarotraumaRadio.ClientSource
 #if CLIENT
             try
             {
-                GUI.AddMessage($"Now playing {radioNamesArray[radioArrayIndex]}", Color.Orange, new Vector2(Item.WorldPositionX, Item.WorldPositionY + 15), Vector2.Zero);
-
                 PlayItemSound();
             }
             catch (Exception e)
@@ -131,24 +128,48 @@ namespace BarotraumaRadio.ClientSource
             hasSoundsOfType[(int)type] = false;
         }
 
-        public void SwitchChannel()
+        public void CycleChannels()
         {
+            if (radioRestarting)
+            {
+                return;
+            }
             if (++radioArrayIndex == radioArray.Length)
             {
                 radioArrayIndex = 0;
             }
-            new Thread(RestartRadio).Start();
+            string message = $"Now playing {radioNamesArray[radioArrayIndex]}";
+            new Thread(delegate() { RestartRadio(message); }).Start();
         }
 
-        public void RestartRadio()
+        public void CycleVolume()
+        {
+            if (radioRestarting)
+            {
+                return;
+            }
+            if (Volume == 1f)
+            {
+                Volume = 0f;
+            }
+            else
+            {
+                Volume += 0.15f;
+            }
+            string message = $"Current volume is {(int)(Volume * 100)}%";
+            new Thread(delegate () { RestartRadio(message); }).Start();
+        }
+
+        public void RestartRadio(string restartMessage)
         {
             if (loopingSoundChannel != null && !radioRestarting)
             {
+                GUI.AddMessage(restartMessage, Color.Orange, new Vector2(Item.WorldPositionX, Item.WorldPositionY + 15), Vector2.Zero);
                 radioRestarting = true;
 
-                Thread.Sleep(100);
+                Thread.Sleep(500);
                 RadioEnabled = false;
-                Thread.Sleep(100);
+                Thread.Sleep(500);
                 RadioEnabled = true;
 
                 radioRestarting = false;
@@ -168,7 +189,12 @@ namespace BarotraumaRadio.ClientSource
                 }
                 case "switch_channel":
                 {
-                    SwitchChannel();
+                    CycleChannels();
+                    break;
+                }
+                case "change_volume":
+                {
+                    CycleVolume();
                     break;
                 }
             }

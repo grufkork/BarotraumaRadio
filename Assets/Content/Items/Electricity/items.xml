@@ -36,6 +36,7 @@
 			<RequiredItem items="screwdriver" type="Equipped" />
 			<input name="set_state" displayname="connection.set_state" />
 			<input name="switch_channel" displayname="connection.switch_channel"/>
+			<input name="change_volume" displayname="connection.change_volume"/>
 			<input name="power_in" displayname="connection.power_in"/>
 		</ConnectionPanel>
 		<Powered powerconsumption="50" currpowerconsumption="50" isactive="true">
