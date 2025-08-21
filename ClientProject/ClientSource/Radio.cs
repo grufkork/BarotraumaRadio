@@ -9,38 +9,25 @@ namespace BarotraumaRadio.ClientSource
     {
         private readonly ContentXElement contentXElement;
 
-        private readonly string[] radioArray =
-        {
-            "https://pool.anison.fm/AniSonFM(320)",
-            "http://radio.truckers.fm",
-            "http://stream.radioparadise.com/flacm",
-            "http://ice1.somafm.com/groovesalad-256-mp3",
-            "http://kexp-mp3-128.streamguys1.com/kexp128.mp3",
-            "http://stream.srg-ssr.ch/m/rsj/mp3_128",
-            "http://media-ssl.musicradio.com/ClassicFM",
-            "http://sc5.radiocaroline.net:8040/stream"
-        };
-        private readonly string[] radioNamesArray =
-{
-            "AniSonFM",
-            "truckers.fm",
-            "radioparadise.com",
-            "somafm",
-            "kexp",
-            "srg-ssr",
-            "ClassicFM",
-            "radiocaroline"
-        };
+        private readonly RadioItem[] radioChannels =
+        [
+            new("AniSonFM", "https://pool.anison.fm/AniSonFM(320)"),
+            new("truckers.fm", "http://radio.truckers.fm"),
+            new("radioparadise.com", "http://stream.radioparadise.com/flacm"),
+            new("somafm", "http://ice1.somafm.com/groovesalad-256-mp3"),
+            new("kexp", "http://kexp-mp3-128.streamguys1.com/kexp128.mp3"),
+            new("srg-ssr", "http://stream.srg-ssr.ch/m/rsj/mp3_128"),
+            new("ClassicFM", "http://media-ssl.musicradio.com/ClassicFM"),
+            new("radiocaroline", "http://sc5.radiocaroline.net:8040/stream"),
+        ];
 
         private int radioArrayIndex = 0;
 
         private float volume = 0.85f;
 
-        private bool radioRestarting = false;
-
         private bool radioEnabled = false;
 
-        private Powered? powered;
+        private readonly Powered powered;
 
         public bool RadioEnabled
         {
@@ -49,13 +36,7 @@ namespace BarotraumaRadio.ClientSource
                 return radioEnabled; 
             }
             private set
-            {
-                powered = item.GetComponent<Powered>();
-                if (powered == null)
-                {
-                    LuaCsSetup.PrintCsError($"Error Getting power component");
-                    return;
-                }
+            {   
                 if ((!powered.HasPower || !value) && radioEnabled)
                 {
                     radioEnabled = false;
@@ -66,7 +47,7 @@ namespace BarotraumaRadio.ClientSource
                     return;
                 }
                 radioEnabled = value;
-                new Thread(Play).Start();
+                PlayAsync();
             }
         }
 
@@ -82,104 +63,79 @@ namespace BarotraumaRadio.ClientSource
             contentXElement = element;
             contentXElement.Element.SetAttributeValue("volume", 1.0f);
             contentXElement.Element.SetAttributeValue("range", 2400.0f);
+            powered = item.GetComponent<Powered>()!;
         }
 
-        public void Play()
+        public async void PlayAsync()
         {
 #if CLIENT
-            try
+            await Task.Run(() =>
             {
-                PlayItemSound();
-            }
-            catch (Exception e)
-            {
-                LuaCsSetup.PrintCsError(e);
-            }
+                try
+                {
+                    BufferSound radioSound = new(GameMain.SoundManager, "RadioStream",
+                        stream: true, streamsReliably: true, radioChannels[radioArrayIndex].Url);
+                    RoundSound roundSound = new(contentXElement, radioSound);
+                    ItemSound itemSound = new(roundSound, ActionType.Always,
+                        loop: true, onlyPlayInSameSub: false)
+                    {
+                        VolumeProperty = "Volume".ToIdentifier()
+                    };
+                    SetParentFields(itemSound);
+                    PlaySound(itemSound.Type, GameMain.Client.Character);
+                }
+                catch (Exception e)
+                {
+                    LuaCsSetup.PrintCsError(e);
+                }
+            });
 #endif
-        }
-
-        private void PlayItemSound()
-        {
-            BufferSound radioSound = new(GameMain.SoundManager, "RadioStream", stream: true, streamsReliably: true, radioArray[radioArrayIndex]);
-            RoundSound  roundSound = new(contentXElement, radioSound);
-            ItemSound   itemSound  = new(roundSound, ActionType.Always, loop: true, onlyPlayInSameSub: false)
-            {
-                VolumeProperty = "Volume".ToIdentifier()
-            };
-            SetParentFields(itemSound);
-            PlaySound(itemSound.Type, GameMain.Client.Character);
         }
 
         private void SetParentFields(ItemSound itemSound)
         {
-            sounds.Add(itemSound.Type, [itemSound]);
-            loopingSound = itemSound;
-            soundSelectionModes = new Dictionary<ActionType, SoundSelectionMode>
+            if (hasSoundsOfType[(int)itemSound.Type])
             {
-                { itemSound.Type, SoundSelectionMode.ItemSpecific }
-            };
+                return;
+            }
+            sounds.Add(itemSound.Type, [itemSound]);
+            soundSelectionModes = new Dictionary<ActionType, SoundSelectionMode>
+                {
+                    { itemSound.Type, SoundSelectionMode.ItemSpecific }
+                };
             hasSoundsOfType[(int)itemSound.Type] = true;
-        }
-
-        private void ClearParentFields(ActionType type)
-        {
-            sounds?.Remove(type);
-            soundSelectionModes?.Remove(type);
-            hasSoundsOfType[(int)type] = false;
         }
 
         public void CycleChannels()
         {
-            if (radioRestarting)
+            radioArrayIndex = (radioArrayIndex + 1) % radioChannels.Length;
+
+            DisplayMessage($"Now playing {radioChannels[radioArrayIndex].Name}");
+
+            if (loopingSound != null)
             {
-                return;
+                if (loopingSound.RoundSound.Sound is BufferSound bufferSound)
+                {
+                    bufferSound.SwitchStation(radioChannels[radioArrayIndex].Url);
+                }
             }
-            if (++radioArrayIndex == radioArray.Length)
-            {
-                radioArrayIndex = 0;
-            }
-            string message = $"Now playing {radioNamesArray[radioArrayIndex]}";
-            new Thread(delegate() { RestartRadio(message); }).Start();
         }
 
         public void CycleVolume()
         {
-            if (radioRestarting)
-            {
-                return;
-            }
-            if (Volume == 1f)
-            {
-                Volume = 0f;
-            }
-            else
-            {
-                Volume += 0.15f;
-            }
-            string message = $"Current volume is {(int)(Volume * 100)}%";
-            new Thread(delegate () { RestartRadio(message); }).Start();
+            Volume = Volume == 1f ? 0f : Math.Min(1f, Volume + 0.15f);
+
+            DisplayMessage($"Current volume is {(int)(Volume * 100)}%");
         }
 
-        public void RestartRadio(string restartMessage)
+        private void DisplayMessage(string message)
         {
-            if (loopingSoundChannel != null && !radioRestarting)
-            {
-                GUI.AddMessage(restartMessage, Color.Orange, new Vector2(Item.WorldPositionX, Item.WorldPositionY + 15), Vector2.Zero);
-                radioRestarting = true;
-
-                Thread.Sleep(500);
-                RadioEnabled = false;
-                Thread.Sleep(500);
-                RadioEnabled = true;
-
-                radioRestarting = false;
-            }
+            GUI.AddMessage(message, Color.Orange, new Vector2(Item.WorldPositionX, Item.WorldPositionY + 15), Vector2.Zero);
         }
 
         public override void ReceiveSignal(Signal signal, Connection connection)
         {
-            float value;
-            float.TryParse(signal.value, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+            float.TryParse(signal.value, NumberStyles.Float, CultureInfo.InvariantCulture, out float value);
             switch (connection.Name)
             {
                 case "set_state":
@@ -198,6 +154,13 @@ namespace BarotraumaRadio.ClientSource
                     break;
                 }
             }
+        }
+
+        private void ClearParentFields(ActionType type)
+        {
+            sounds?.Remove(type);
+            soundSelectionModes?.Remove(type);
+            hasSoundsOfType[(int)type] = false;
         }
 
         public void Stop()

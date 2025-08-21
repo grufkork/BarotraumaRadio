@@ -35,6 +35,12 @@ namespace BarotraumaRadio.ClientSource
             return bufferPlayer.ReadPcmData(buffer, buffer.Length);
         }
 
+        public void SwitchStation(string stationUrl)
+        {
+            bufferPlayer.Stop();
+            bufferPlayer.Play(stationUrl);
+        }
+
         public override float GetAmplitudeAtPlaybackPos(int playbackPos)
         {
             throw new NotImplementedException();
