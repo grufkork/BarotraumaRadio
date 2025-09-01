@@ -2,6 +2,8 @@
 using Barotrauma.Items.Components;
 using Microsoft.Xna.Framework;
 using System.Globalization;
+using System.Reflection;
+using System.Text.Json;
 
 namespace BarotraumaRadio.ClientSource
 {
@@ -9,7 +11,10 @@ namespace BarotraumaRadio.ClientSource
     {
         private readonly ContentXElement contentXElement;
 
-        private readonly RadioItem[] radioChannels =
+        private string stationsPath = "";
+        private string lastPlayedPath = "";
+
+        private RadioItem[] radiostations =
         [
             new("AniSonFM", "https://pool.anison.fm/AniSonFM(320)"),
             new("truckers.fm", "http://radio.truckers.fm"),
@@ -60,11 +65,84 @@ namespace BarotraumaRadio.ClientSource
 
         public Radio(Item item, ContentXElement element) : base(item, element)
         {
+            LoadFromFile();
             contentXElement = element;
             contentXElement.Element.SetAttributeValue("volume", 1.0f);
             contentXElement.Element.SetAttributeValue("range", 2400.0f);
             powered = item.GetComponent<Powered>()!;
         }
+
+        private void UpdateLastPlayed()
+        {
+            File.WriteAllText(lastPlayedPath, radioArrayIndex.ToString());
+        }
+
+        private void LoadFromFile()
+        {
+            string contentDirectory = FindContentDirectory();
+            if (string.IsNullOrEmpty(contentDirectory))
+            {
+                LuaCsSetup.PrintCsError("Could not find content directory");
+                return;
+            }
+
+            stationsPath = Path.Combine(contentDirectory, "radiostations.json");
+            lastPlayedPath = Path.Combine(contentDirectory, "lastPlayed.txt");
+
+            try
+            {
+                if (File.Exists(stationsPath))
+                {
+                    LuaCsSetup.PrintCsMessage("Successfully found stations file");
+                    string stationsText = File.ReadAllText(stationsPath);
+                    radiostations = JsonSerializer.Deserialize<RadioItem[]>(stationsText)!;
+                }
+
+                if (File.Exists(lastPlayedPath))
+                {
+                    LuaCsSetup.PrintCsMessage("Successfully found last played file");
+                    int index = int.Parse(File.ReadAllText(lastPlayedPath));
+                    radioArrayIndex = Math.Min(index, radiostations.Length - 1);
+                }
+            }
+            catch (Exception ex)
+            {
+                LuaCsSetup.PrintCsError(ex);
+            }
+        }
+
+        private string FindContentDirectory()
+        {
+            try
+            {
+                string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+                string modDirectory = Path.GetDirectoryName(assemblyLocation)!;
+                string contentPath = Path.Combine(modDirectory, "..", "..", "..", "Content");
+
+                LuaCsSetup.PrintCsMessage("Going to check contentPath - " + contentPath);
+
+                if (Directory.Exists(contentPath))
+                    return Path.GetFullPath(contentPath);
+            }
+            catch (Exception ex)
+            {
+                LuaCsSetup.PrintCsError(ex);
+            }
+
+            try
+            {
+                string contentPath = Path.Combine("RadioMod", "Content");
+                if (Directory.Exists(contentPath))
+                    return contentPath;
+            }
+            catch (Exception ex)
+            {
+                LuaCsSetup.PrintCsError(ex);
+            }
+
+            return "";
+        }
+
 
         public async void PlayAsync()
         {
@@ -73,11 +151,18 @@ namespace BarotraumaRadio.ClientSource
             {
                 try
                 {
-                    BufferSound radioSound = new(GameMain.SoundManager, "RadioStream",
-                        stream: true, streamsReliably: true, radioChannels[radioArrayIndex].Url);
+                    BufferSound radioSound = new(
+                        GameMain.SoundManager,
+                        "RadioStream",
+                        stream: true,
+                        streamsReliably: true,
+                        radiostations[radioArrayIndex].Url);
                     RoundSound roundSound = new(contentXElement, radioSound);
-                    ItemSound itemSound = new(roundSound, ActionType.Always,
-                        loop: true, onlyPlayInSameSub: false)
+                    ItemSound itemSound = new(
+                        roundSound,
+                        ActionType.Always,
+                        loop: true,
+                        onlyPlayInSameSub: false)
                     {
                         VolumeProperty = "Volume".ToIdentifier()
                     };
@@ -108,15 +193,16 @@ namespace BarotraumaRadio.ClientSource
 
         public void CycleChannels()
         {
-            radioArrayIndex = (radioArrayIndex + 1) % radioChannels.Length;
+            radioArrayIndex = (radioArrayIndex + 1) % radiostations.Length;
 
-            DisplayMessage($"Now playing {radioChannels[radioArrayIndex].Name}");
+            UpdateLastPlayed();
+            DisplayMessage($"Now playing {radiostations[radioArrayIndex].Name}");
 
             if (loopingSound != null)
             {
                 if (loopingSound.RoundSound.Sound is BufferSound bufferSound)
                 {
-                    bufferSound.SwitchStation(radioChannels[radioArrayIndex].Url);
+                    bufferSound.SwitchStation(radiostations[radioArrayIndex].Url);
                 }
             }
         }
