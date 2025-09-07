@@ -51,6 +51,8 @@ The radio requires the following connections:
 - **SRG SSR**: Swiss broadcasting
 - **Classic FM**: Classical music
 - **Radio Caroline**: Legendary pirate radio
+- **Jaz24**: Jazz music
+- **NTS Radio**: East London radio station
 
 ## Compatibility
 

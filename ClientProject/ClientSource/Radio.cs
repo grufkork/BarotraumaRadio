@@ -122,7 +122,11 @@ namespace BarotraumaRadio.ClientSource
                 LuaCsSetup.PrintCsMessage("Going to check contentPath - " + contentPath);
 
                 if (Directory.Exists(contentPath))
+                {
                     return Path.GetFullPath(contentPath);
+                }
+
+                LuaCsSetup.PrintCsMessage("Failed to find content directory at" + contentPath);
             }
             catch (Exception ex)
             {
@@ -132,8 +136,15 @@ namespace BarotraumaRadio.ClientSource
             try
             {
                 string contentPath = Path.Combine("RadioMod", "Content");
+
+                LuaCsSetup.PrintCsMessage("Going to check contentPath - " + contentPath);
+
                 if (Directory.Exists(contentPath))
+                {
                     return contentPath;
+                }
+
+                LuaCsSetup.PrintCsError("Failed to find content directory at" + contentPath);
             }
             catch (Exception ex)
             {
@@ -167,7 +178,23 @@ namespace BarotraumaRadio.ClientSource
                         VolumeProperty = "Volume".ToIdentifier()
                     };
                     SetParentFields(itemSound);
-                    PlaySound(itemSound.Type, GameMain.Client.Character);
+
+                    if (GameMain.Client is not null)
+                    {
+                        PlaySound(itemSound.Type, GameMain.Client.Character);
+                    }
+                    else
+                    {
+                        foreach (Character character in GameMain.GameSession.CrewManager.GetCharacters())
+                        {
+                            if (character.IsLocalPlayer)
+                            {
+                                PlaySound(itemSound.Type, character);
+                                return;
+                            }
+                        }
+                        LuaCsSetup.PrintCsError("Could not find controlled character");
+                    }
                 }
                 catch (Exception e)
                 {
@@ -183,7 +210,10 @@ namespace BarotraumaRadio.ClientSource
             {
                 return;
             }
-            sounds.Add(itemSound.Type, [itemSound]);
+            if (!sounds.ContainsKey(itemSound.Type))
+            {
+                sounds.Add(itemSound.Type, [itemSound]);
+            }
             soundSelectionModes = new Dictionary<ActionType, SoundSelectionMode>
                 {
                     { itemSound.Type, SoundSelectionMode.ItemSpecific }
@@ -244,8 +274,14 @@ namespace BarotraumaRadio.ClientSource
 
         private void ClearParentFields(ActionType type)
         {
-            sounds?.Remove(type);
-            soundSelectionModes?.Remove(type);
+            if (sounds.ContainsKey(type))
+            {
+                sounds?.Remove(type);
+            }
+            if (soundSelectionModes.ContainsKey(type))
+            { 
+                soundSelectionModes?.Remove(type);
+            }
             hasSoundsOfType[(int)type] = false;
         }
 

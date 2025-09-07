@@ -30,5 +30,13 @@
   {
     "Name": "radiocaroline",
     "Url": "http://sc5.radiocaroline.net:8040/stream"
+  },
+  {
+    "Name": "Jazz24",
+    "Url": "https://knkx-live-a.edge.audiocdn.com/6285_128k"
+  },
+  {
+    "Name": "NTS Radio",
+    "Url": "https://stream-relay-geo.ntslive.net/stream"
   }
 ]

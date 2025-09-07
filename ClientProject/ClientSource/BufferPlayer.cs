@@ -20,14 +20,14 @@ namespace BarotraumaRadio.ClientSource
 
             if (!Directory.Exists(vlcPath))
             {
-                LuaCsSetup.PrintCsError($"ОШИБКА: Путь не найден: {vlcPath}");
+                LuaCsSetup.PrintCsError($"Failed to find path for VLC player at: {vlcPath}");
             }
             else
             {
-                LuaCsSetup.PrintCsMessage($"VLC путь: {vlcPath}");
+                LuaCsSetup.PrintCsMessage($"Found VLC at path: {vlcPath}");
 
                 LuaCsSetup.PrintCsMessage($"libvlc.dll exists: {File.Exists(Path.Combine(vlcPath, "libvlc.dll"))}");
-                LuaCsSetup.PrintCsMessage($"plugins exists: {Directory.Exists(Path.Combine(vlcPath, "plugins"))}");
+                LuaCsSetup.PrintCsMessage($"Plugins exists: {Directory.Exists(Path.Combine(vlcPath, "plugins"))}");
 
                 Core.Initialize(vlcPath);
             }
@@ -48,20 +48,19 @@ namespace BarotraumaRadio.ClientSource
 
         public int ReadPcmData(short[] outputBuffer, int maxSamples)
         {
-            int bytesRequested = maxSamples * 2; // 2 байта на сэмпл (16 бит)
+            int bytesRequested = maxSamples * 2; 
             byte[] byteBuffer = new byte[bytesRequested];
             int bytesRead = _pcmBuffer.Read(byteBuffer, 0, bytesRequested);
 
             Buffer.BlockCopy(byteBuffer, 0, outputBuffer, 0, bytesRead);
-            return bytesRead / 2; // Возвращаем количество прочитанных сэмплов
+            return bytesRead / 2; 
         }
 
         public void Play(string url)
         {
             using Media media = new(_libVLC, url, FromType.FromLocation);
 
-            // Добавьте параметры буферизации
-            media.AddOption(":network-caching=500"); // 500 мс буферизации
+            media.AddOption(":network-caching=500"); 
             media.AddOption(":live-caching=500");
             _mediaPlayer.Volume = 125;
             _mediaPlayer.Play(media);
