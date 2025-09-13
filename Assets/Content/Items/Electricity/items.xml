@@ -32,7 +32,12 @@
 			<RequiredItem items="wrench" type="Equipped" />
 		</Holdable>
 		<CustomInterface canbeselected="true" ElementStates="true,1,50">
-			<GuiFrame relativesize="0.2,0.15" anchor="CenterLeft" pivot="BottomLeft" relativeoffset="0.006,-0.05" style="ItemUI" />
+			<GuiFrame relativesize="0.2,0.15" anchor="BottomCenter" relativeoffset="0.0,0.0" style="ConnectionPanel" />
+			<Button text="Start/stop">
+				<StatusEffect type="OnUse" target="This" tags="next_station" setvalue="true">
+					<LuaHook name="radio.play" />
+				</StatusEffect>
+			</Button>
 			<Button text="Next Station">
 				<StatusEffect type="OnUse" target="This" tags="next_station" setvalue="true">
 					<LuaHook name="radio.station" />

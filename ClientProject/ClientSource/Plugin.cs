@@ -12,6 +12,7 @@ namespace BarotraumaRadio
             InjectComponent<Radio>("Radio");
             CreateStationHook("Radio");
             CreateVolumeHook("Radio");
+            CreatePlayHook("Radio");
         }
 
         private void CreateStationHook(string name)
@@ -51,6 +52,29 @@ namespace BarotraumaRadio
                             return null;
                         }
                         component.CycleVolume();
+                    }
+                    catch (Exception e)
+                    {
+                        LuaCsSetup.PrintCsError("[VolumeHook]: " + e.Message);
+                    }
+                    return null;
+                });
+        }
+
+        private void CreatePlayHook(string name)
+        {
+            string hookName = name.ToLower() + ".play";
+            GameMain.LuaCs.Hook.Add(hookName, hookName,
+                (object[] args) => {
+                    Item item = (Item)args[2];
+                    try
+                    {
+                        Radio component = item.GetComponent<Radio>();
+                        if (component == null)
+                        {
+                            return null;
+                        }
+                        component.ChangeState();
                     }
                     catch (Exception e)
                     {

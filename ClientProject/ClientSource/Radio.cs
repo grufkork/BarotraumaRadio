@@ -31,6 +31,7 @@ namespace BarotraumaRadio.ClientSource
         private float volume = 0.85f;
 
         private bool radioEnabled = false;
+        private bool lastLeverValue = false;
 
         private readonly Powered powered;
 
@@ -247,6 +248,11 @@ namespace BarotraumaRadio.ClientSource
             GUI.AddMessage(message, Color.Orange, new Vector2(Item.WorldPositionX, Item.WorldPositionY + 15), Vector2.Zero);
         }
 
+        public void ChangeState()
+        {
+            RadioEnabled = !RadioEnabled;
+        }
+
         public override void ReceiveSignal(Signal signal, Connection connection)
         {
             float.TryParse(signal.value, NumberStyles.Float, CultureInfo.InvariantCulture, out float value);
@@ -254,7 +260,11 @@ namespace BarotraumaRadio.ClientSource
             {
                 case "set_state":
                 {
-                    RadioEnabled = value != 0f;
+                    if (lastLeverValue != (value != 0f))
+                    {
+                        RadioEnabled = value != 0f;
+                        lastLeverValue = value != 0f;
+                    }
                     break;
                 }
                 case "switch_channel":
