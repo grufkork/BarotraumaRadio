@@ -104,3 +104,5 @@
 /ServerProject/obj/x64/Debug/net8.0/ref/BarotraumaRadio.dll
 /ServerProject/obj/project.assets.json
 /ServerProject/obj/project.nuget.cache
+/ServerProject/bin/Debug/net8.0/BarotraumaRadio.deps.json
+/ClientProject/bin/Debug/net8.0/BarotraumaRadio.deps.json
