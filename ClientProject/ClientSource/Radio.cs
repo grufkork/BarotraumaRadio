@@ -26,7 +26,7 @@ namespace BarotraumaRadio.ClientSource
             new("radiocaroline", "http://sc5.radiocaroline.net:8040/stream"),
         ];
 
-        private int radioArrayIndex = 0;
+        private int currentStationIndex = 0;
 
         private float volume = 0.85f;
 
@@ -74,7 +74,7 @@ namespace BarotraumaRadio.ClientSource
 
         private void UpdateLastPlayed()
         {
-            File.WriteAllText(lastPlayedPath, radioArrayIndex.ToString());
+            File.WriteAllText(lastPlayedPath, currentStationIndex.ToString());
         }
 
         private void LoadFromFile()
@@ -102,7 +102,7 @@ namespace BarotraumaRadio.ClientSource
                 {
                     LuaCsSetup.PrintCsMessage("Successfully found last played file");
                     int index = int.Parse(File.ReadAllText(lastPlayedPath));
-                    radioArrayIndex = Math.Min(index, radiostations.Length - 1);
+                    currentStationIndex = Math.Min(index, radiostations.Length - 1);
                 }
             }
             catch (Exception ex)
@@ -167,7 +167,7 @@ namespace BarotraumaRadio.ClientSource
                         "RadioStream",
                         stream: true,
                         streamsReliably: true,
-                        radiostations[radioArrayIndex].Url);
+                        radiostations[currentStationIndex].Url);
                     RoundSound roundSound = new(contentXElement, radioSound);
                     ItemSound itemSound = new(
                         roundSound,
@@ -185,20 +185,18 @@ namespace BarotraumaRadio.ClientSource
                     }
                     else
                     {
-                        foreach (Character character in GameMain.GameSession.CrewManager.GetCharacters())
+                        Character? character = GameMain.GameSession.CrewManager!.GetCharacters().Where(c => c.IsLocalPlayer).FirstOrDefault();
+                        if (character == null)
                         {
-                            if (character.IsLocalPlayer)
-                            {
-                                PlaySound(itemSound.Type, character);
-                                return;
-                            }
+                            LuaCsSetup.PrintCsError("Could not find controlled character");
+                            return;
                         }
-                        LuaCsSetup.PrintCsError("Could not find controlled character");
+                        PlaySound(itemSound.Type, character);
                     }
                 }
                 catch (Exception e)
                 {
-                    LuaCsSetup.PrintCsError(e);
+                    LuaCsSetup.PrintCsError("[PlayAsync]: " + e.Message);
                 }
             });
 #endif
@@ -221,18 +219,18 @@ namespace BarotraumaRadio.ClientSource
             hasSoundsOfType[(int)itemSound.Type] = true;
         }
 
-        public void CycleChannels()
+        public void CycleStations()
         {
-            radioArrayIndex = (radioArrayIndex + 1) % radiostations.Length;
+            currentStationIndex = (currentStationIndex + 1) % radiostations.Length;
 
             UpdateLastPlayed();
-            DisplayMessage($"Now playing {radiostations[radioArrayIndex].Name}");
+            DisplayMessage($"Now playing {radiostations[currentStationIndex].Name}");
 
             if (loopingSound != null)
             {
                 if (loopingSound.RoundSound.Sound is BufferSound bufferSound)
                 {
-                    bufferSound.SwitchStation(radiostations[radioArrayIndex].Url);
+                    bufferSound.SwitchStation(radiostations[currentStationIndex].Url);
                 }
             }
         }
@@ -261,7 +259,7 @@ namespace BarotraumaRadio.ClientSource
                 }
                 case "switch_channel":
                 {
-                    CycleChannels();
+                    CycleStations();
                     break;
                 }
                 case "change_volume":

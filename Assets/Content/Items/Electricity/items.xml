@@ -31,6 +31,19 @@
 			</StatusEffect>
 			<RequiredItem items="wrench" type="Equipped" />
 		</Holdable>
+		<CustomInterface canbeselected="true" ElementStates="true,1,50">
+			<GuiFrame relativesize="0.2,0.15" anchor="CenterLeft" pivot="BottomLeft" relativeoffset="0.006,-0.05" style="ItemUI" />
+			<Button text="Next Station">
+				<StatusEffect type="OnUse" target="This" tags="next_station" setvalue="true">
+					<LuaHook name="radio.station" />
+				</StatusEffect>
+			</Button>
+			<Button text="Change Volume">
+				<StatusEffect type="OnUse" target="This" tags="change_volume" setvalue="true">
+					<LuaHook name="radio.volume" />
+				</StatusEffect>
+			</Button>
+		</CustomInterface>
 		<ConnectionPanel selectkey="Action" canbeselected="true" msg="ItemMsgRewireScrewdriver" hudpriority="10">
 			<GuiFrame relativesize="0.2,0.32" minsize="400,350" maxsize="480,420" anchor="Center" style="ConnectionPanel" />
 			<RequiredItem items="screwdriver" type="Equipped" />
@@ -40,7 +53,6 @@
 			<input name="power_in" displayname="connection.power_in"/>
 		</ConnectionPanel>
 		<Powered powerconsumption="50" currpowerconsumption="50" isactive="true">
-			<GuiFrame relativesize="0.18,0.15" minsize="350,160" maxsize="420,192" anchor="Center" relativeoffset="0,-0.1" style="ItemUI" msg="ItemMsgInteractSelect" />
 		</Powered>
 	</Item>
 </Items>

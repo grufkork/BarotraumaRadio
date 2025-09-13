@@ -35,6 +35,8 @@ namespace BarotraumaRadio.ServerSource
             signalSender = new Character[INPUT_COUNT];
         }
 
+        
+
         public override void ReceiveSignal(Signal signal, Connection connection)
         {
             float value;

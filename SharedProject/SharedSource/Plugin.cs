@@ -40,6 +40,11 @@ namespace BarotraumaRadio
         public void InjectComponent<T>(string name) where T : ItemComponent
         {
             Type type = typeof(T);
+            CreateSpawnHook<T>(type, name);
+        }
+
+        private void CreateSpawnHook<T>(Type type, string name) where T : ItemComponent
+        {
             string hookName = name.ToLower() + ".spawn";
             GameMain.LuaCs.Hook.Add(hookName, hookName,
                 (object[] args) => {
@@ -55,15 +60,13 @@ namespace BarotraumaRadio
                                 constructor = type.GetConstructor(new Type[] { typeof(Item), typeof(ContentXElement) });
                                 if (constructor == null)
                                 {
-                                    DebugConsole.ThrowError(
-                                        $"Could not find the constructor of the component \"{name}\" ({item.Prefab.ContentFile.Path})");
+                                    LuaCsSetup.PrintCsError($"[Spawn hook]: Could not find the constructor of the component \"{name}\" ({item.Prefab.ContentFile.Path})");
                                     return null;
                                 }
                             }
                             catch (Exception e)
                             {
-                                DebugConsole.ThrowError(
-                                    $"Could not find the constructor of the component \"{name}\" ({item.Prefab.ContentFile.Path})", e);
+                                LuaCsSetup.PrintCsError($"[Spawn hook]: " + e.Message);
                                 return null;
                             }
                             ItemComponent ic = null;
@@ -75,7 +78,7 @@ namespace BarotraumaRadio
                             }
                             catch (TargetInvocationException e)
                             {
-                                DebugConsole.ThrowError($"Error while loading component of the type {type}.", e.InnerException);
+                                LuaCsSetup.PrintCsError($"[Spawn hook]: " + e.InnerException.Message);
                                 return null;
                             }
                             item.AddComponent(ic);
