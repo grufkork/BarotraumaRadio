@@ -106,3 +106,17 @@
 /ServerProject/obj/project.nuget.cache
 /ServerProject/bin/Debug/net8.0/BarotraumaRadio.deps.json
 /ClientProject/bin/Debug/net8.0/BarotraumaRadio.deps.json
+/ServerProject/obj/Debug/net8.0/LinuxServer.csproj.CoreCompileInputs.cache
+/ClientProject/obj/Debug/net8.0/LinuxClient.csproj.CoreCompileInputs.cache
+/ClientProject/obj/Debug/net8.0/LinuxClient.csproj.FileListAbsolute.txt
+/ClientProject/obj/Debug/net8.0/OSXClient.csproj.CoreCompileInputs.cache
+/ClientProject/obj/Debug/net8.0/OSXClient.csproj.FileListAbsolute.txt
+/ClientProject/obj/x64/Debug/net8.0/WindowsClient.csproj.CoreCompileInputs.cache
+/ClientProject/obj/x64/Debug/net8.0/WindowsClient.csproj.FileListAbsolute.txt
+/ServerProject/obj/Debug/net8.0/LinuxServer.csproj.FileListAbsolute.txt
+/ServerProject/obj/Debug/net8.0/OSXServer.csproj.CoreCompileInputs.cache
+/ServerProject/obj/Debug/net8.0/OSXServer.csproj.FileListAbsolute.txt
+/ServerProject/obj/x64/Debug/net8.0/WindowsServer.csproj.CoreCompileInputs.cache
+/ServerProject/obj/x64/Debug/net8.0/WindowsServer.csproj.FileListAbsolute.txt
+/Assets/obj/Debug/net6.0/Assets.csproj.FileListAbsolute.txt
+/SharedProject/SharedProject.projitems

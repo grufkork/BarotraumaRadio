@@ -1,5 +1,5 @@
 ﻿using Barotrauma;
-using BarotraumaRadio.ServerSource;
+using BarotraumaRadio;
 
 namespace BarotraumaRadio
 {
@@ -7,7 +7,6 @@ namespace BarotraumaRadio
     {
         public void InitServer()
         {
-            InjectComponent<Radio>("Radio");
         }
     }
 }

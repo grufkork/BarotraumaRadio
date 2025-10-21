@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BarotraumaRadio.ClientSource
+namespace BarotraumaRadio
 {
     public record RadioItem(string Name, string Url);
 }

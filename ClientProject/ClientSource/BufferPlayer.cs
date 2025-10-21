@@ -3,7 +3,7 @@ using LibVLCSharp.Shared;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace BarotraumaRadio.ClientSource
+namespace BarotraumaRadio
 {
     public class BufferPlayer : IDisposable
     {

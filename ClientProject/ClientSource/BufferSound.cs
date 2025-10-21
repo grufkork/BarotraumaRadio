@@ -2,7 +2,7 @@
 using Barotrauma.Sounds;
 using OpenAL;
 
-namespace BarotraumaRadio.ClientSource
+namespace BarotraumaRadio
 {
     public class BufferSound : Sound
     {

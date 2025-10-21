@@ -17,6 +17,7 @@ namespace BarotraumaRadio
         public void Initialize()
         {
             Instance = new Plugin();
+            InjectRadioComponent();
 #if CLIENT
             LuaCsSetup.PrintCsMessage("init client started");
             InitClient();
@@ -37,60 +38,25 @@ namespace BarotraumaRadio
             // Not yet supported: Called during the Barotrauma startup phase before vanilla content is loaded.
         }
 
-        public void InjectComponent<T>(string name) where T : ItemComponent
+        public void InjectRadioComponent()
         {
-            Type type = typeof(T);
-            CreateSpawnHook<T>(type, name);
-        }
+            GameMain.LuaCs.Hook.Add("radio.spawn", "radio.spawn", (object[] args) => {
+                Item item = (Item)args[2];
 
-        private void CreateSpawnHook<T>(Type type, string name) where T : ItemComponent
-        {
-            string hookName = name.ToLower() + ".spawn";
-            GameMain.LuaCs.Hook.Add(hookName, hookName,
-                (object[] args) => {
-                    Item item = (Item)args[2];
-                    try
-                    {
-                        if (item.GetComponent<T>() == null)
-                        {
-                            ConstructorInfo constructor;
-                            try
-                            {
-                                if (type != typeof(ItemComponent) && !type.IsSubclassOf(typeof(ItemComponent))) { return null; }
-                                constructor = type.GetConstructor(new Type[] { typeof(Item), typeof(ContentXElement) });
-                                if (constructor == null)
-                                {
-                                    LuaCsSetup.PrintCsError($"[Spawn hook]: Could not find the constructor of the component \"{name}\" ({item.Prefab.ContentFile.Path})");
-                                    return null;
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                LuaCsSetup.PrintCsError($"[Spawn hook]: " + e.Message);
-                                return null;
-                            }
-                            ItemComponent ic = null;
-                            try
-                            {
-                                object[] lobject = [item, new ContentXElement(null, new XElement(XName.Get(name)))];
-                                object component = constructor.Invoke(lobject);
-                                ic = (ItemComponent)component;
-                            }
-                            catch (TargetInvocationException e)
-                            {
-                                LuaCsSetup.PrintCsError($"[Spawn hook]: " + e.InnerException.Message);
-                                return null;
-                            }
-                            item.AddComponent(ic);
+                if (item.GetComponent<Radio>() != null) return null;
 
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LuaCsSetup.PrintCsError(ex);
-                    }
-                    return null;
-                });
+                try
+                {
+                    Radio radioComponent = new(item, new ContentXElement(null, new XElement("Radio")));
+                    item.AddComponent(radioComponent);
+                }
+                catch (Exception ex)
+                {
+                    LuaCsSetup.PrintCsError($"[Radio spawn hook]: {ex.Message}");
+                }
+
+                return null;
+            });
         }
 
         public void Dispose()

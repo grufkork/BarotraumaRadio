@@ -1,6 +1,6 @@
 ﻿using Barotrauma;
 using Barotrauma.Items.Components;
-using BarotraumaRadio.ClientSource;
+using BarotraumaRadio;
 using System.Runtime.CompilerServices;
 
 namespace BarotraumaRadio
@@ -9,7 +9,6 @@ namespace BarotraumaRadio
     {
         public void InitClient()
         {
-            InjectComponent<Radio>("Radio");
             CreateStationHook("Radio");
             CreateVolumeHook("Radio");
             CreatePlayHook("Radio");

@@ -1,56 +1,19 @@
 ﻿using Barotrauma;
 using Barotrauma.Items.Components;
+using Barotrauma.Networking;
 using System.Globalization;
 
-namespace BarotraumaRadio.ServerSource
+namespace BarotraumaRadio
 {
-    public class Radio : Powered
+    public partial class Radio : ItemComponent, IServerSerializable, IClientSerializable
     {
-        private const int INPUT_COUNT = 3;
-
-        private bool radioEnabled = false;
-
-        private bool RadioEnabled 
+        public void ServerEventWrite(IWriteMessage msg, Client c, NetEntityEvent.IData extraData = null)
         {
-            set 
-            {
-                if (radioEnabled == value || !HasPower)
-                {
-                    return;
-                }
-                radioEnabled = value;
-            }
         }
 
-        protected readonly Character[] signalSender;
-
-        public void ChangeState(bool active)
+        public void ServerEventRead(IReadMessage msg, Client c)
         {
-            RadioEnabled = active;
-        }
-
-        public Radio(Item item, ContentXElement element)
-            :base(item, element)
-        {
-            signalSender = new Character[INPUT_COUNT];
-        }
-
-        public override void ReceiveSignal(Signal signal, Connection connection)
-        {
-            float value;
-            float.TryParse(signal.value, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
-            switch (connection.Name)
-            {
-                case "set_state":
-                {
-                    ChangeState(value != 0f);
-                    break;
-                }
-                case "switch_channel":
-                {
-                    break;
-                }
-            }
+            throw new NotImplementedException();
         }
     }
 }
