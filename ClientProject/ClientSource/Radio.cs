@@ -3,12 +3,10 @@ using Barotrauma.Items.Components;
 using Barotrauma.Networking;
 using Microsoft.Xna.Framework;
 using System.Globalization;
-using System.Reflection;
-using System.Text.Json;
 
 namespace BarotraumaRadio
 {
-    public partial class Radio : ItemComponent, IServerSerializable, IClientSerializable
+    public partial class Radio : CustomInterface
     {
         public bool RadioEnabled
         {
@@ -17,7 +15,18 @@ namespace BarotraumaRadio
                 return radioEnabled; 
             }
             private set
-            {   
+            {
+                if (powered == null)
+                {
+                    if (TryGetPoweredComponent(out Powered? component))
+                    {
+                        powered = component;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
                 if ((!powered.HasPower || !value) && radioEnabled)
                 {
                     radioEnabled = false;
@@ -47,12 +56,9 @@ namespace BarotraumaRadio
         public async void PlayAsync()
         {
 #if CLIENT
-            int count = 0;
-            foreach (ItemComponent component in item.Components)
-            {
-                LuaCsSetup.PrintCsMessage($"[{count}]: " + component.ToString());
-                count++;
-            }
+            IWriteMessage message = GameMain.LuaCs.Networking.Start("RequestToServer");
+            message.WriteString("hi");
+            GameMain.LuaCs.Networking.Send(message);
             await Task.Run(() =>
             {
                 try
@@ -198,14 +204,6 @@ namespace BarotraumaRadio
             StopSounds(type);
             ClearParentFields(type);
 #endif
-        }
-
-        public void ClientEventRead(IReadMessage msg, float sendingTime)
-        {
-        }
-
-        public void ClientEventWrite(IWriteMessage msg, NetEntityEvent.IData extraData = null)
-        {
         }
     }
 }

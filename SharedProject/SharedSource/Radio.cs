@@ -1,12 +1,16 @@
 ﻿using Barotrauma;
 using Barotrauma.Items.Components;
 using Barotrauma.Networking;
+using System;
+using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
+using System.Xml.Linq;
+using static Barotrauma.Voting;
 
 namespace BarotraumaRadio
 {
-    public partial class Radio : ItemComponent, IServerSerializable, IClientSerializable
+    public partial class Radio : CustomInterface
     {
         private readonly ContentXElement contentXElement;
 
@@ -32,15 +36,17 @@ namespace BarotraumaRadio
         private bool radioEnabled = false;
         private bool lastLeverValue = false;
 
-        private readonly Powered powered;
+        private Powered? powered;
 
         public Radio(Item item, ContentXElement element) : base(item, element)
         {
-            LoadFromFile();
             contentXElement = element;
-            contentXElement.Element.SetAttributeValue("volume", 1.0f);
-            contentXElement.Element.SetAttributeValue("range", 2400.0f);
-            powered = item.GetComponent<Powered>()!;
+        }
+
+        public bool TryGetPoweredComponent(out Powered? component)
+        {
+            component = item.GetComponent<Powered>();
+            return component != null;
         }
 
         private void LoadFromFile()

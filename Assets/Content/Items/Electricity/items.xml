@@ -26,13 +26,20 @@
 		<Sprite texture="Radio.png" depth="0.8" sourcerect="0,0,112,97" origin="0.5,0.5" canflipx="false" />
 		<Body width="112" height="97" density="15" />
 		<Holdable selectkey="Select" pickkey="Use" aimpos="65,-10" handle1="0,0" attachable="true" aimable="true" PickingTime="5.0" slots="Any,RightHand,LeftHand" msg="ItemMsgDetachWrench">
-			<StatusEffect type="OnSpawn" target="This" stackable="false">
-				<LuaHook name="radio.spawn" />
-			</StatusEffect>
 			<RequiredItem items="wrench" type="Equipped" />
 		</Holdable>
-		<CustomInterface canbeselected="true" ElementStates="true,1,50">
-			<GuiFrame relativesize="0.2,0.15" anchor="BottomCenter" relativeoffset="0.0,0.0" style="ConnectionPanel" />
+		<ConnectionPanel selectkey="Action" canbeselected="true" msg="ItemMsgRewireScrewdriver" hudpriority="10">
+			<GuiFrame relativesize="0.2,0.32" minsize="400,350" maxsize="480,420" anchor="Center" style="ConnectionPanel" />
+			<RequiredItem items="screwdriver" type="Equipped" />
+			<input name="set_state" displayname="connection.set_state" />
+			<input name="switch_channel" displayname="connection.switch_channel"/>
+			<input name="change_volume" displayname="connection.change_volume"/>
+			<input name="power_in" displayname="connection.power_in"/>
+		</ConnectionPanel>
+		<Powered powerconsumption="50" currpowerconsumption="50" isactive="true">
+		</Powered>
+		<Radio volume="1.0" range="2400.0">
+			<GuiFrame relativesize="0.2,0.15" anchor="BottomCenter" msg="ItemMsgRewireScrewdriver" relativeoffset="0.0,0.0" style="ConnectionPanel" />
 			<Button text="Start/stop">
 				<StatusEffect type="OnUse" target="This" tags="next_station" setvalue="true">
 					<LuaHook name="radio.play" />
@@ -48,16 +55,6 @@
 					<LuaHook name="radio.volume" />
 				</StatusEffect>
 			</Button>
-		</CustomInterface>
-		<ConnectionPanel selectkey="Action" canbeselected="true" msg="ItemMsgRewireScrewdriver" hudpriority="10">
-			<GuiFrame relativesize="0.2,0.32" minsize="400,350" maxsize="480,420" anchor="Center" style="ConnectionPanel" />
-			<RequiredItem items="screwdriver" type="Equipped" />
-			<input name="set_state" displayname="connection.set_state" />
-			<input name="switch_channel" displayname="connection.switch_channel"/>
-			<input name="change_volume" displayname="connection.change_volume"/>
-			<input name="power_in" displayname="connection.power_in"/>
-		</ConnectionPanel>
-		<Powered powerconsumption="50" currpowerconsumption="50" isactive="true">
-		</Powered>
+		</Radio>
 	</Item>
 </Items>

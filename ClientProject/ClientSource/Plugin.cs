@@ -1,7 +1,11 @@
 ﻿using Barotrauma;
 using Barotrauma.Items.Components;
-using BarotraumaRadio;
-using System.Runtime.CompilerServices;
+using Barotrauma.Networking;
+using HarmonyLib;
+using Microsoft.Xna.Framework;
+using System.Reflection;
+using System.Reflection.Emit;
+using static Barotrauma.Item;
 
 namespace BarotraumaRadio
 {
@@ -12,6 +16,11 @@ namespace BarotraumaRadio
             CreateStationHook("Radio");
             CreateVolumeHook("Radio");
             CreatePlayHook("Radio");
+
+            harmony.Patch(
+                original: typeof(ClientEntityEventManager).GetMethod("ReadEvent", BindingFlags.NonPublic | BindingFlags.Instance),
+                prefix: new HarmonyMethod(typeof(Plugin).GetMethod(nameof(R_ReadEvent)))
+            );
         }
 
         private void CreateStationHook(string name)
@@ -81,6 +90,21 @@ namespace BarotraumaRadio
                     }
                     return null;
                 });
+        }
+
+        public static bool R_ReadEvent(IReadMessage buffer, IServerSerializable entity, float sendingTime)
+        {
+            try
+            {
+                entity.ClientEventRead(buffer, sendingTime);
+            }
+            catch
+            {
+                int newBitPosition = buffer.BitPosition + (int)buffer.ReadVariableUInt32() * 8;
+                LuaCsSetup.PrintCsMessage($"[RadioMod]: Dropped exception, set new bit position = {newBitPosition}");
+                buffer.BitPosition = newBitPosition;
+            }
+            return false;
         }
 
         private void CreateSyncHook(string name)
