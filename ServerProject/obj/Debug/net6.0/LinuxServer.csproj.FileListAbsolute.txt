@@ -1,6 +1,0 @@
-C:\Programming\Projects\C#\BarotraumaRadioMod\VSProjectSkeleton\ServerProject\obj\Debug\net6.0\LinuxServer.csproj.AssemblyReference.cache
-C:\Programming\Projects\C#\BarotraumaRadioMod\VSProjectSkeleton\ServerProject\obj\Debug\net6.0\LinuxServer.GeneratedMSBuildEditorConfig.editorconfig
-C:\Programming\Projects\C#\BarotraumaRadioMod\VSProjectSkeleton\ServerProject\obj\Debug\net6.0\LinuxServer.AssemblyInfoInputs.cache
-C:\Programming\Projects\C#\BarotraumaRadioMod\VSProjectSkeleton\ServerProject\obj\Debug\net6.0\LinuxServer.AssemblyInfo.cs
-C:\Programming\Projects\C#\BarotraumaRadioMod\VSProjectSkeleton\ServerProject\obj\Debug\net6.0\LinuxServer.csproj.CoreCompileInputs.cache
-C:\Programming\Projects\C#\BarotraumaRadioMod\VSProjectSkeleton\ServerProject\obj\Debug\net6.0\LinuxServer.sourcelink.json
