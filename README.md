@@ -22,7 +22,7 @@ An immersive radio mod for Barotrauma that adds craftable radios to submarines, 
 
 To add your own radio stations:
 
-1. Navigate to the mod folder: `Steam/steamapps/workshop/content/602960/3559932434/Content/`
+1. Navigate to the mod folder: `C:\Users\User\AppData\Local\Daedalic Entertainment GmbH\Barotrauma\WorkshopMods\Installed\3559932434\Content`
 2. Open `radioStations.json` in a text editor
 3. Add new stations in JSON format:
 ```json
