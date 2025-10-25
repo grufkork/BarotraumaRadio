@@ -1,11 +1,9 @@
 ﻿using Barotrauma;
-using Barotrauma.Items.Components;
 using Barotrauma.Networking;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
-using System.Reflection;
-using System.Reflection.Emit;
-using static Barotrauma.Item;
+using System;
+using System.Linq;
 
 namespace BarotraumaRadio
 {
@@ -16,11 +14,24 @@ namespace BarotraumaRadio
             CreateStationHook("Radio");
             CreateVolumeHook("Radio");
             CreatePlayHook("Radio");
+        }
 
-            harmony.Patch(
-                original: typeof(ClientEntityEventManager).GetMethod("ReadEvent", BindingFlags.NonPublic | BindingFlags.Instance),
-                prefix: new HarmonyMethod(typeof(Plugin).GetMethod(nameof(R_ReadEvent)))
-            );
+        private static Radio? FindClosestRadio(Item remote)
+        {
+            Item? RadioItem = Item.ItemList
+                .Where(it => it.Name == "Radio" && Vector2.Distance(it.WorldPosition, remote.WorldPosition) <= 500)
+                .OrderBy(it => Vector2.Distance(it.WorldPosition, remote.WorldPosition))
+                .FirstOrDefault();
+
+            if (RadioItem == null)
+            {
+                GUI.AddMessage("No Radio nearby", Color.Orange, new Vector2(remote.WorldPositionX, remote.WorldPositionY + 15), Vector2.Zero);
+                return null;
+            }
+
+            Radio component = RadioItem.GetComponent<Radio>();
+
+            return component;
         }
 
         private void CreateStationHook(string name)
@@ -31,11 +42,13 @@ namespace BarotraumaRadio
                     Item item = (Item)args[2];
                     try
                     {
-                        Radio component = item.GetComponent<Radio>();
+                        Radio? component = FindClosestRadio(item);
+
                         if (component == null)
                         {
                             return null;
                         }
+
                         component.CycleStations();
                     }
                     catch (Exception e)
@@ -54,7 +67,7 @@ namespace BarotraumaRadio
                     Item item = (Item)args[2];
                     try
                     {
-                        Radio component = item.GetComponent<Radio>();
+                        Radio? component = FindClosestRadio(item);
                         if (component == null)
                         {
                             return null;
@@ -77,7 +90,7 @@ namespace BarotraumaRadio
                     Item item = (Item)args[2];
                     try
                     {
-                        Radio component = item.GetComponent<Radio>();
+                        Radio? component = FindClosestRadio(item);
                         if (component == null)
                         {
                             return null;
@@ -90,21 +103,6 @@ namespace BarotraumaRadio
                     }
                     return null;
                 });
-        }
-
-        public static bool R_ReadEvent(IReadMessage buffer, IServerSerializable entity, float sendingTime)
-        {
-            try
-            {
-                entity.ClientEventRead(buffer, sendingTime);
-            }
-            catch
-            {
-                int newBitPosition = buffer.BitPosition + (int)buffer.ReadVariableUInt32() * 8;
-                LuaCsSetup.PrintCsMessage($"[RadioMod]: Dropped exception, set new bit position = {newBitPosition}");
-                buffer.BitPosition = newBitPosition;
-            }
-            return false;
         }
 
         private void CreateSyncHook(string name)

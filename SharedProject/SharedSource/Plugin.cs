@@ -1,11 +1,6 @@
 ﻿using Barotrauma;
-using Barotrauma.Items.Components;
-using Barotrauma.Networking;
-using Barotrauma.Steam;
 using HarmonyLib;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Xml.Linq;
 
 [assembly: IgnoresAccessChecksTo("Barotrauma")]
 [assembly: IgnoresAccessChecksTo("DedicatedServer")]

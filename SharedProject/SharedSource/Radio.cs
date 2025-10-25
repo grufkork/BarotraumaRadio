@@ -1,20 +1,21 @@
 ﻿using Barotrauma;
 using Barotrauma.Items.Components;
-using Barotrauma.Networking;
-using System;
-using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
-using System.Xml.Linq;
-using static Barotrauma.Voting;
 
 namespace BarotraumaRadio
 {
-    public partial class Radio : CustomInterface
+    public partial class Radio : ItemComponent
     {
         private readonly ContentXElement contentXElement;
 
-        private string stationsPath = "";
+        private int    currentStationIndex = 0;
+        private float  volume = 0.85f;
+
+        private bool   radioEnabled   = false;
+        private bool   lastLeverValue = false;
+
+        private string stationsPath   = "";
         private string lastPlayedPath = "";
 
         private RadioItem[] radiostations =
@@ -29,18 +30,14 @@ namespace BarotraumaRadio
             new("radiocaroline", "http://sc5.radiocaroline.net:8040/stream"),
         ];
 
-        private int currentStationIndex = 0;
-
-        private float volume = 0.85f;
-
-        private bool radioEnabled = false;
-        private bool lastLeverValue = false;
-
         private Powered? powered;
 
         public Radio(Item item, ContentXElement element) : base(item, element)
         {
             contentXElement = element;
+            LoadFromFile();
+            TryGetPoweredComponent(out Powered? component);
+            powered = component;
         }
 
         public bool TryGetPoweredComponent(out Powered? component)

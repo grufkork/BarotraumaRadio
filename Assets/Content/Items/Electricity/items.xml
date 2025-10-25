@@ -38,8 +38,50 @@
 		</ConnectionPanel>
 		<Powered powerconsumption="50" currpowerconsumption="50" isactive="true">
 		</Powered>
-		<Radio volume="1.0" range="2400.0">
-			<GuiFrame relativesize="0.2,0.15" anchor="BottomCenter" msg="ItemMsgRewireScrewdriver" relativeoffset="0.0,0.0" style="ConnectionPanel" />
+		<Radio volume="1.0" range="2400.0"/>
+	</Item>
+	<Item DontCleanUp="true" name="Radio remote" identifier="radio_remote" category="Electrical" maxstacksize="1" cargocontaineridentifier="metalcrate" Tags="smallitem,remote" description="" scale="0.5" impactsoundtag="impact_metal_light">
+		<Price baseprice="100" minleveldifficulty="5">
+			<Price storeidentifier="merchantoutpost" />
+			<Price storeidentifier="merchantcity" sold="false" />
+			<Price storeidentifier="merchantresearch" multiplier="1.25" />
+			<Price storeidentifier="merchantmilitary" />
+			<Price storeidentifier="merchantmine" />
+			<Price storeidentifier="merchantengineering" multiplier="0.9" />
+		</Price>
+		<PreferredContainer primary="engcab" />
+		<PreferredContainer secondary="wreckengcab,abandonedengcab,outpostengcab,beaconengcab" amount="1" spawnprobability="0.05" />
+		<Deconstruct time="10">
+			<Item identifier="copper" />
+			<Item identifier="iron" />
+		</Deconstruct>
+		<Fabricate suitablefabricators="fabricator" requiredtime="10">
+			<RequiredSkill identifier="electrical" level="5" />
+			<RequiredItem identifier="copper" />
+			<RequiredItem identifier="iron" />
+		</Fabricate>
+		<InventoryIcon texture="Remote.png" sourcerect="0,0,28,80" origin="0.5,0.5" />
+		<Sprite texture="Remote.png" depth="0.5" sourcerect="0,0,28,80" origin="0.5,0.5" canflipx="false" />
+		<Body width="28" height="80" density="13" restitution="0.15" angulardamping="1.0"/>
+		<Throwable canbepicked="true" characterusable="true" canBeCombined="false" slots="Any,RightHand,LeftHand" throwforce="3.5" aimpos="35,-10" msg="ItemMsgPickUpSelect">
+			<StatusEffect type="OnSecondaryUse" target="This" delay="0.01">
+				<Use />
+			</StatusEffect>
+		</Throwable>
+		<Projectile characterusable="false" launchimpulse="0" impulsespread="0.0">
+			<Attack targetimpulse="3" severlimbsprobability="0.0" itemdamage="0" structuredamage="0" structuresoundtype="StructureSlash">
+				<Affliction identifier="blunttrauma" strength="1" />
+				<Affliction identifier="stun" strength="0.2" />
+			</Attack>
+			<StatusEffect type="OnImpact" target="This" tags="next_station" setvalue="true">
+				<LuaHook name="radio.station" />
+			</StatusEffect>
+			<StatusEffect type="OnImpact" target="This" tags="change_volume" setvalue="true">
+				<LuaHook name="radio.volume" />
+			</StatusEffect>
+		</Projectile>
+		<CustomInterface drawhudwhenequipped="true">
+			<GuiFrame relativesize="0.2,0.15" anchor="Center" relativeoffset="0.0,0.15" style="ConnectionPanel" />
 			<Button text="Start/stop">
 				<StatusEffect type="OnUse" target="This" tags="next_station" setvalue="true">
 					<LuaHook name="radio.play" />
@@ -55,6 +97,6 @@
 					<LuaHook name="radio.volume" />
 				</StatusEffect>
 			</Button>
-		</Radio>
+		</CustomInterface>
 	</Item>
 </Items>

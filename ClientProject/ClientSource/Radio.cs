@@ -6,7 +6,7 @@ using System.Globalization;
 
 namespace BarotraumaRadio
 {
-    public partial class Radio : CustomInterface
+    public partial class Radio : ItemComponent
     {
         public bool RadioEnabled
         {
@@ -56,9 +56,6 @@ namespace BarotraumaRadio
         public async void PlayAsync()
         {
 #if CLIENT
-            IWriteMessage message = GameMain.LuaCs.Networking.Start("RequestToServer");
-            message.WriteString("hi");
-            GameMain.LuaCs.Networking.Send(message);
             await Task.Run(() =>
             {
                 try
