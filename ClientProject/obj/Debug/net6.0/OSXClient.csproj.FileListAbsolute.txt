@@ -1,6 +1,0 @@
-C:\Programming\Projects\C#\BarotraumaRadioMod\VSProjectSkeleton\ClientProject\obj\Debug\net6.0\OSXClient.csproj.AssemblyReference.cache
-C:\Programming\Projects\C#\BarotraumaRadioMod\VSProjectSkeleton\ClientProject\obj\Debug\net6.0\OSXClient.GeneratedMSBuildEditorConfig.editorconfig
-C:\Programming\Projects\C#\BarotraumaRadioMod\VSProjectSkeleton\ClientProject\obj\Debug\net6.0\OSXClient.AssemblyInfoInputs.cache
-C:\Programming\Projects\C#\BarotraumaRadioMod\VSProjectSkeleton\ClientProject\obj\Debug\net6.0\OSXClient.AssemblyInfo.cs
-C:\Programming\Projects\C#\BarotraumaRadioMod\VSProjectSkeleton\ClientProject\obj\Debug\net6.0\OSXClient.csproj.CoreCompileInputs.cache
-C:\Programming\Projects\C#\BarotraumaRadioMod\VSProjectSkeleton\ClientProject\obj\Debug\net6.0\OSXClient.sourcelink.json
