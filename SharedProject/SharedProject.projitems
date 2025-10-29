@@ -9,10 +9,16 @@
     <Import_RootNamespace>SharedProject</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+<<<<<<< Updated upstream
     <Compile Include="$(MSBuildThisFileDirectory)SharedSource\Plugin.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SharedSource\Radio.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SharedSource\RadioConfig.cs" />
     <Compile Include="..\SharedProject\SharedSource\RadioDataStruct.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SharedSource\RadioItem.cs" />
+=======
+    <Compile Include="$(MSBuildThisFileDirectory)SharedProject\Plugin.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SharedProject\Radio.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SharedProject\RadioItem.cs" />
+>>>>>>> Stashed changes
   </ItemGroup>
 </Project>
