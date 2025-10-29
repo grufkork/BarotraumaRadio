@@ -1,9 +1,7 @@
 ﻿using Barotrauma;
+using Barotrauma.Items.Components;
 using Barotrauma.Networking;
-using HarmonyLib;
 using Microsoft.Xna.Framework;
-using System;
-using System.Linq;
 
 namespace BarotraumaRadio
 {
@@ -14,6 +12,45 @@ namespace BarotraumaRadio
             CreateStationHook("Radio");
             CreateVolumeHook("Radio");
             CreatePlayHook("Radio");
+            CreateSyncHook("Radio");
+            SetClientSyncCallback();
+        }
+
+        private void SetClientSyncCallback()
+        {
+            GameMain.LuaCs.Networking.Receive("ChangeStationFromServer", (object[] args) =>
+            {
+                LuaCsSetup.PrintCsMessage("1");
+                IReadMessage message = (IReadMessage)args[0];
+                LuaCsSetup.PrintCsMessage("2");
+                RadioDataStruct dataStruct = INetSerializableStruct.Read<RadioDataStruct>(message);
+                LuaCsSetup.PrintCsMessage("3");
+                Item? item = Item.ItemList.FirstOrDefault(serverItem => serverItem.ID == dataStruct.RadioID);
+                LuaCsSetup.PrintCsMessage("4");
+                if (item == null)
+                    return;
+                LuaCsSetup.PrintCsMessage("5");
+                ItemComponent? component = item.Components.FirstOrDefault(c => c is Radio);
+                LuaCsSetup.PrintCsMessage("6");
+                if (component != null && component is Radio radioComponent && radioComponent.ServerSync)
+                {
+                    LuaCsSetup.PrintCsMessage("7");
+                    if (radioComponent.currentStationUrl == dataStruct.ParamValue)
+                    {
+                        return;
+                    }
+                    LuaCsSetup.PrintCsMessage("8");
+                    radioComponent.currentStationUrl = dataStruct.ParamValue!;
+                    radioComponent.ChangeStation();
+                }
+            });
+
+            GameMain.LuaCs.Networking.Receive("SendStringFromServer", (object[] args) =>
+            {
+                IReadMessage message = (IReadMessage)args[0];
+                string data = message.ReadString();
+                LuaCsSetup.PrintCsMessage(data);
+            });
         }
 
         private static Radio? FindClosestRadio(Item remote)
@@ -43,13 +80,23 @@ namespace BarotraumaRadio
                     try
                     {
                         Radio? component = FindClosestRadio(item);
-
                         if (component == null)
                         {
                             return null;
                         }
+                        if (GameMain.Client is not null)
+                        {
+                            if (!GameMain.Client.Character.HeldItems.Contains(item))
+                            {
+                                return null;
+                            }
 
-                        component.CycleStations();
+                            component.CycleStations();
+                        }
+                        else
+                        {
+                            component.CycleStations();
+                        }
                     }
                     catch (Exception e)
                     {
@@ -72,7 +119,14 @@ namespace BarotraumaRadio
                         {
                             return null;
                         }
-                        component.CycleVolume();
+                        if (GameMain.Client is not null && !GameMain.Client.Character.HeldItems.Contains(item))
+                        {
+                            return null;
+                        }
+                        else
+                        {              
+                            component.CycleVolume();
+                        }
                     }
                     catch (Exception e)
                     {
@@ -108,6 +162,31 @@ namespace BarotraumaRadio
         private void CreateSyncHook(string name)
         {
             string hookName = name.ToLower() + ".sync";
+            GameMain.LuaCs.Hook.Add(hookName, hookName,
+                (object[] args) => {
+                    Item item = (Item)args[2];
+                    try
+                    {
+                        Radio? component = FindClosestRadio(item);
+                        if (component == null)
+                        {
+                            return null;
+                        }
+                        if (GameMain.Client is not null && !GameMain.Client.Character.HeldItems.Contains(item))
+                        {
+                            return null;
+                        }
+                        else
+                        {
+                            component.ServerSync = !component.ServerSync;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        LuaCsSetup.PrintCsError("[VolumeHook]: " + e.Message);
+                    }
+                    return null;
+                });
         }
     }
 }

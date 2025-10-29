@@ -10,8 +10,7 @@ namespace BarotraumaRadio
 {
     public partial class Plugin : IAssemblyPlugin
     {
-        public static Plugin Instance;
-        public readonly Harmony harmony = new Harmony("plag.barotrauma.radio");
+        public static Plugin? Instance;
 
         public void Initialize()
         {

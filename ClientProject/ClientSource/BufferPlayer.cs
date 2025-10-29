@@ -15,7 +15,7 @@ namespace BarotraumaRadio
 
         public BufferPlayer()
         {
-            string modPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string modPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
             string vlcPath = Path.Combine(modPath, "../../../Content/libvlc/win-x64");
 
             if (!Directory.Exists(vlcPath))

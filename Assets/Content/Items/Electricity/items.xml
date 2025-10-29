@@ -28,6 +28,10 @@
 		<Holdable selectkey="Select" pickkey="Use" aimpos="65,-10" handle1="0,0" attachable="true" aimable="true" PickingTime="5.0" slots="Any,RightHand,LeftHand" msg="ItemMsgDetachWrench">
 			<RequiredItem items="wrench" type="Equipped" />
 		</Holdable>
+		<ItemContainer hideitems="true" drawinventory="true" capacity="1" maxstacksize="1" slotsperrow="1" itempos="0,0" iteminterval="0,0" itemrotation="0" canbeselected="true" containedspritedepth="0.79" msg="ItemMsgInteractSelect" autofill="True">
+			<GuiFrame relativesize="0.1,0.15" anchor="Center" style="ItemUI" />
+			<Containable items="radio_remote, Radio remote" />
+		</ItemContainer>
 		<ConnectionPanel selectkey="Action" canbeselected="true" msg="ItemMsgRewireScrewdriver" hudpriority="10">
 			<GuiFrame relativesize="0.2,0.32" minsize="400,350" maxsize="480,420" anchor="Center" style="ConnectionPanel" />
 			<RequiredItem items="screwdriver" type="Equipped" />
@@ -60,9 +64,9 @@
 			<RequiredItem identifier="copper" />
 			<RequiredItem identifier="iron" />
 		</Fabricate>
-		<InventoryIcon texture="Remote.png" sourcerect="0,0,28,80" origin="0.5,0.5" />
-		<Sprite texture="Remote.png" depth="0.5" sourcerect="0,0,28,80" origin="0.5,0.5" canflipx="false" />
-		<Body width="28" height="80" density="13" restitution="0.15" angulardamping="1.0"/>
+		<InventoryIcon texture="Remote.png" sourcerect="0,0,28,66" origin="0.5,0.5" />
+		<Sprite texture="Remote.png" depth="0.5" sourcerect="0,0,28,66" origin="0.5,0.5" canflipx="false" />
+		<Body width="28" height="66" density="13" restitution="0.15" angulardamping="1.0"/>
 		<Throwable canbepicked="true" characterusable="true" canBeCombined="false" slots="Any,RightHand,LeftHand" throwforce="3.5" aimpos="35,-10" msg="ItemMsgPickUpSelect">
 			<StatusEffect type="OnSecondaryUse" target="This" delay="0.01">
 				<Use />
@@ -95,6 +99,11 @@
 			<Button text="Change Volume">
 				<StatusEffect type="OnUse" target="This" tags="change_volume" setvalue="true">
 					<LuaHook name="radio.volume" />
+				</StatusEffect>
+			</Button>
+			<Button text="Server Synchronization">
+				<StatusEffect type="OnUse" target="This" tags="switch_sync" setvalue="true">
+					<LuaHook name="radio.sync" />
 				</StatusEffect>
 			</Button>
 		</CustomInterface>

@@ -3,11 +3,47 @@ using Barotrauma.Items.Components;
 using Barotrauma.Networking;
 using Microsoft.Xna.Framework;
 using System.Globalization;
+using System.Text.Json;
 
 namespace BarotraumaRadio
 {
     public partial class Radio : ItemComponent
     {
+        public bool ServerSync
+        {
+            get
+            {
+                return serverSync;
+            }
+            set
+            {
+                if (GameMain.Client is not null)
+                {
+                    serverSync = value;
+                }
+                else
+                {
+                    serverSync = false;
+                }
+                UpdateConfig();
+                if (serverSync)
+                {
+                    DisplayMessage("Server sync enabled");
+                    RequestStationFromServer();
+                }
+                else
+                {
+                    DisplayMessage("Server sync disabled");
+                    string newStation = radiostations[currentStationIndex].Url;
+                    if (currentStationUrl != newStation)
+                    {
+                        currentStationUrl = newStation;
+                        ChangeStation();
+                    }
+                }
+            }
+        }
+
         public bool RadioEnabled
         {
             get 
@@ -27,7 +63,7 @@ namespace BarotraumaRadio
                         return;
                     }
                 }
-                if ((!powered.HasPower || !value) && radioEnabled)
+                if ((!powered!.HasPower || !value) && radioEnabled)
                 {
                     radioEnabled = false;
                     Stop();
@@ -48,14 +84,44 @@ namespace BarotraumaRadio
             set => volume = MathHelper.Clamp(value, 0f, 1f);
         }
 
-        private void UpdateLastPlayed()
+        private void RequestStationFromServer()
         {
-            File.WriteAllText(lastPlayedPath, currentStationIndex.ToString());
+            IWriteMessage message = GameMain.LuaCs.Networking.Start("RequestStationFromClient");
+
+            INetSerializableStruct dataStruct = new RadioDataStruct(item.ID, "");
+
+            dataStruct.Write(message);
+            GameMain.LuaCs.Networking.Send(message);
+        }
+
+        private void UpdateConfig()
+        {
+            ClientRadioConfig config = new(currentStationIndex, Volume, ServerSync);
+            string serializedConfig = JsonSerializer.Serialize(config);
+            File.WriteAllText(clientConfigPath, serializedConfig);
+        }
+
+        private void SendStationToServer()
+        {
+            if (ServerSync)
+            {
+
+                IWriteMessage message = GameMain.LuaCs.Networking.Start("ChangeStationFromClient");
+
+                INetSerializableStruct dataStruct = new RadioDataStruct(item.ID, currentStationUrl);
+
+                dataStruct.Write(message);
+                GameMain.LuaCs.Networking.Send(message);
+            }
         }
 
         public async void PlayAsync()
         {
 #if CLIENT
+            if (ServerSync && GameMain.Client is not null)
+            {
+                RequestStationFromServer();
+            }
             await Task.Run(() =>
             {
                 try
@@ -119,25 +185,40 @@ namespace BarotraumaRadio
 
         public void CycleStations()
         {
-            currentStationIndex = (currentStationIndex + 1) % radiostations.Length;
-
-            UpdateLastPlayed();
+            currentStationIndex = GetNextStationIndex();
+            currentStationUrl = radiostations[currentStationIndex].Url;
+            UpdateConfig();
             DisplayMessage($"Now playing {radiostations[currentStationIndex].Name}");
+            SendStationToServer();
+            ChangeStation();
+        }
 
+        public void ChangeStation()
+        {
             if (loopingSound != null)
             {
                 if (loopingSound.RoundSound.Sound is BufferSound bufferSound)
                 {
-                    bufferSound.SwitchStation(radiostations[currentStationIndex].Url);
+                    bufferSound.SwitchStation(currentStationUrl);
                 }
             }
         }
 
         public void CycleVolume()
         {
-            Volume = Volume == 1f ? 0f : Math.Min(1f, Volume + 0.15f);
-
+            Volume = GetNextVolumeValue();
+            UpdateConfig();
             DisplayMessage($"Current volume is {(int)(Volume * 100)}%");
+        }
+
+        public float GetNextVolumeValue()
+        {
+            return Volume == 1f ? 0f : Math.Min(1f, Volume + 0.15f);
+        }
+
+        public int GetNextStationIndex()
+        {
+            return (currentStationIndex + 1) % radiostations.Length;
         }
 
         private void DisplayMessage(string message)
@@ -179,15 +260,18 @@ namespace BarotraumaRadio
 
         private void ClearParentFields(ActionType type)
         {
-            if (sounds.ContainsKey(type))
+            if (sounds is not null && sounds.ContainsKey(type))
             {
                 sounds?.Remove(type);
             }
-            if (soundSelectionModes.ContainsKey(type))
+            if (soundSelectionModes is not null && soundSelectionModes.ContainsKey(type))
             { 
                 soundSelectionModes?.Remove(type);
             }
-            hasSoundsOfType[(int)type] = false;
+            if (hasSoundsOfType is not null && hasSoundsOfType.Length >= (int)type)
+            {
+                hasSoundsOfType[(int)type] = false;
+            }
         }
 
         public void Stop()

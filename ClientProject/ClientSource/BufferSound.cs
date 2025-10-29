@@ -16,7 +16,7 @@ namespace BarotraumaRadio
             bool stream,
             bool streamsReliably,
             string stationUrl,
-            ContentXElement xElement = null,
+            ContentXElement? xElement = null,
             bool getFullPath = true) : base(
                 owner,
                 filename,

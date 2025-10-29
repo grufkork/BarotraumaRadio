@@ -10,13 +10,16 @@ namespace BarotraumaRadio
         private readonly ContentXElement contentXElement;
 
         private int    currentStationIndex = 0;
+        public  string currentStationUrl;
         private float  volume = 0.85f;
 
         private bool   radioEnabled   = false;
         private bool   lastLeverValue = false;
+        private bool   serverSync     = true;
 
         private string stationsPath   = "";
-        private string lastPlayedPath = "";
+        private string clientConfigPath = "";
+        private string serverConfigPath = "";
 
         private RadioItem[] radiostations =
         [
@@ -38,6 +41,10 @@ namespace BarotraumaRadio
             LoadFromFile();
             TryGetPoweredComponent(out Powered? component);
             powered = component;
+            if (string.IsNullOrEmpty(currentStationUrl))
+            {
+                currentStationUrl = radiostations[currentStationIndex].Url;
+            }
         }
 
         public bool TryGetPoweredComponent(out Powered? component)
@@ -56,23 +63,52 @@ namespace BarotraumaRadio
             }
 
             stationsPath = Path.Combine(contentDirectory, "radiostations.json");
-            lastPlayedPath = Path.Combine(contentDirectory, "lastPlayed.txt");
+            clientConfigPath = Path.Combine(contentDirectory, "clientConfig.json");
+            serverConfigPath = Path.Combine(contentDirectory, "serverConfig.json");
 
             try
             {
                 if (File.Exists(stationsPath))
                 {
                     LuaCsSetup.PrintCsMessage("Successfully found stations file");
-                    string stationsText = File.ReadAllText(stationsPath);
-                    radiostations = JsonSerializer.Deserialize<RadioItem[]>(stationsText)!;
+                    string serializedStations = File.ReadAllText(stationsPath);
+                    radiostations = JsonSerializer.Deserialize<RadioItem[]>(serializedStations)!;
                 }
-
-                if (File.Exists(lastPlayedPath))
+                else
                 {
-                    LuaCsSetup.PrintCsMessage("Successfully found last played file");
-                    int index = int.Parse(File.ReadAllText(lastPlayedPath));
-                    currentStationIndex = Math.Min(index, radiostations.Length - 1);
+                    string serializedStations = JsonSerializer.Serialize(radiostations);
+                    File.WriteAllText(stationsPath, serializedStations);
                 }
+#if CLIENT
+                if (File.Exists(clientConfigPath))
+                {
+                    LuaCsSetup.PrintCsMessage("Successfully found client config file");
+                    string serializedClientConfig = File.ReadAllText(clientConfigPath);
+                    ClientRadioConfig clientConfig = JsonSerializer.Deserialize<ClientRadioConfig>(serializedClientConfig)!;
+                    currentStationIndex = clientConfig.LastPlayedIndex;
+                    volume = clientConfig.Volume;
+                    if (GameMain.Client is not null)
+                    {
+                        serverSync = clientConfig.ServerSync;
+                    }
+                    else
+                    {
+                        serverSync = false;
+                    }
+                }
+#endif
+#if SERVER
+                if (File.Exists(serverConfigPath))
+                {
+                    string serializedServerConfig = File.ReadAllText(serverConfigPath);
+                    ServerRadioConfig clientConfig = JsonSerializer.Deserialize<ServerRadioConfig>(serializedServerConfig)!;
+                    currentStationUrl = clientConfig.LastPlayedUrl;
+                }
+                else
+                {
+                    currentStationUrl = radiostations[0].Url;
+                }
+#endif
             }
             catch (Exception ex)
             {
@@ -88,14 +124,10 @@ namespace BarotraumaRadio
                 string modDirectory = Path.GetDirectoryName(assemblyLocation)!;
                 string contentPath = Path.Combine(modDirectory, "..", "..", "..", "Content");
 
-                LuaCsSetup.PrintCsMessage("Going to check contentPath - " + contentPath);
-
                 if (Directory.Exists(contentPath))
                 {
                     return Path.GetFullPath(contentPath);
                 }
-
-                LuaCsSetup.PrintCsMessage("Failed to find content directory at" + contentPath);
             }
             catch (Exception ex)
             {
@@ -106,14 +138,10 @@ namespace BarotraumaRadio
             {
                 string contentPath = Path.Combine("RadioMod", "Content");
 
-                LuaCsSetup.PrintCsMessage("Going to check contentPath - " + contentPath);
-
                 if (Directory.Exists(contentPath))
                 {
                     return contentPath;
                 }
-
-                LuaCsSetup.PrintCsError("Failed to find content directory at" + contentPath);
             }
             catch (Exception ex)
             {
