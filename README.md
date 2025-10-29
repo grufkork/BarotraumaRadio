@@ -3,14 +3,16 @@
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/gitempERROR/BarotraumaRadio)
 [![Steam Workshop](https://img.shields.io/badge/Steam-Workshop-000000?style=for-the-badge&logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=3559932434)
 
-An immersive radio mod for Barotrauma that adds craftable radios to submarines, fully operable through the game's wiring system.
+An immersive radio mod for Barotrauma that adds craftable radios to submarines. Control your radio through the game's wiring system or toss the remote to a crewmate - perfect for battling the deep-sea blues during those long delivery missions.
 
 ## Features
 
 - **Fabricator Crafting**: Create radios at the fabricator and install them anywhere on your submarine
-- **Wiring Integration**: Full control through in-game wiring connections
+- **Dual Control Options**: Operate via in-game wiring system OR use a dedicated remote control
+- **Built-in Remote Storage**: The radio has a dedicated slot to store the remote
+- **Server Synchronization**: Optional server-side sync for consistent multiplayer experience
 - **Pre-configured Stations**: Includes popular internet radio stations
-- **Customizable**: Easily add your own radio stations via config file
+- **Easy Customization**: Add your own radio stations via simple config file
 
 ## Installation
 
@@ -33,30 +35,38 @@ To add your own radio stations:
 ```
 4. Save the file and launch the game
 
-## Wiring Setup
+## Control Options
 
-The radio requires the following connections:
+### Wiring Control
+The radio supports full wiring integration:
 - **Power line**: Connect to submarine's power grid
 - **Switch**: To turn the radio on/off
 - **Button**: For switching between stations
 - **Button**: For volume control
 
+### Remote Control
+- Use the dedicated remote control for wireless operation
+- Remote can be stored directly in the radio unit
+- Perfect for passing control to other crew members
+
 ## Pre-installed Radio Stations
 
-- **AniSonFM**: Japanese anime music
-- **Truckers FM**: Music and talk for truckers
-- **Radio Paradise**: Eclectic music mix
-- **SomaFM**: Listener-supported radio
-- **KEXP**: Seattle-based music station
-- **SRG SSR**: Swiss broadcasting
-- **Classic FM**: Classical music
-- **Radio Caroline**: Legendary pirate radio
-- **Jaz24**: Jazz music
-- **NTS Radio**: East London radio station
+- **AniSonFM**: Japanese anime music and soundtracks
+- **Truckers FM**: Music and talk for the open road
+- **Radio Paradise**: Carefully curated eclectic music mix
+- **SomaFM**: Listener-supported, commercial-free radio
+- **KEXP**: Seattle-based music discovery station
+- **SRG SSR**: Swiss public broadcasting
+- **Classic FM**: Classical music for everyone
+- **Radio Caroline**: Legendary British pirate radio
+- **Jazz24**: Non-stop jazz streaming
+- **NTS Radio**: Eclectic music from East London
 
 ## Compatibility
 
-This mod uses Barotrauma's standard wiring and sound systems without modifying game code. It's compatible with most other mods, though there's a minor incompatibility with RealSonar that may cause console errors (doesn't affect functionality).
+This mod uses Barotrauma's standard wiring and sound systems without modifying core game code, making it compatible with most other mods.
+
+There's one known minor incompatibility with RealSonar that may display a console error, but this doesn't affect gameplay or the functionality of either mod.
 
 ## Support
 
@@ -64,3 +74,7 @@ If you encounter issues or have suggestions:
 1. Check the [GitHub Issues](https://github.com/gitempERROR/BarotraumaRadio/issues) for existing reports
 2. Create a new issue with details about the problem
 3. Include your game version and mod list for better support
+
+---
+
+*Keep the crew entertained even when surrounded by crushing depths and monstrous creatures. Because sometimes, what you really need isn't more ammunition - it's better music.*
