@@ -85,7 +85,14 @@ namespace BarotraumaRadio
                     LuaCsSetup.PrintCsMessage("Successfully found client config file");
                     string serializedClientConfig = File.ReadAllText(clientConfigPath);
                     ClientRadioConfig clientConfig = JsonSerializer.Deserialize<ClientRadioConfig>(serializedClientConfig)!;
-                    currentStationIndex = clientConfig.LastPlayedIndex;
+                    if(clientConfig.LastPlayedIndex <0 || clientConfig.LastPlayedIndex >= radiostations.Length)
+                    {
+                        currentStationIndex = 0;
+                    }
+                    else
+                    {
+                        currentStationIndex = clientConfig.LastPlayedIndex;
+                    }
                     volume = clientConfig.Volume;
                     if (GameMain.Client is not null)
                     {
