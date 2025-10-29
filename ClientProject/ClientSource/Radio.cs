@@ -5,8 +5,9 @@ using Microsoft.Xna.Framework;
 using System.Globalization;
 using System.Text.Json;
 
-namespace BarotraumaRadio
+namespace BarotraumaRadio // Client
 {
+<<<<<<< Updated upstream
     public partial class Radio : ItemComponent
     {
         public bool ServerSync
@@ -43,6 +44,10 @@ namespace BarotraumaRadio
                 }
             }
         }
+=======
+    public partial class Radio : IServerSerializable
+    {
+>>>>>>> Stashed changes
 
         public bool RadioEnabled
         {
@@ -52,6 +57,7 @@ namespace BarotraumaRadio
             }
             private set
             {
+                LuaCsSetup.PrintCsMessage("try start...");
                 if (powered == null)
                 {
                     if (TryGetPoweredComponent(out Powered? component))
@@ -63,8 +69,14 @@ namespace BarotraumaRadio
                         return;
                     }
                 }
+<<<<<<< Updated upstream
                 if ((!powered!.HasPower || !value) && radioEnabled)
+=======
+                LuaCsSetup.PrintCsMessage("next");
+                if ((!powered.HasPower || !value) && radioEnabled)
+>>>>>>> Stashed changes
                 {
+                    LuaCsSetup.PrintCsMessage("no power");
                     radioEnabled = false;
                     Stop();
                 }
@@ -72,6 +84,7 @@ namespace BarotraumaRadio
                 {
                     return;
                 }
+                LuaCsSetup.PrintCsMessage("Set to " + value);
                 radioEnabled = value;
                 PlayAsync();
             }
@@ -84,6 +97,7 @@ namespace BarotraumaRadio
             set => volume = MathHelper.Clamp(value, 0f, 1f);
         }
 
+<<<<<<< Updated upstream
         private void RequestStationFromServer()
         {
             IWriteMessage message = GameMain.LuaCs.Networking.Start("RequestStationFromClient");
@@ -115,17 +129,27 @@ namespace BarotraumaRadio
             }
         }
 
+=======
+>>>>>>> Stashed changes
         public async void PlayAsync()
         {
+            LuaCsSetup.PrintCsMessage("Playing radio...");
 #if CLIENT
+<<<<<<< Updated upstream
             if (ServerSync && GameMain.Client is not null)
             {
                 RequestStationFromServer();
             }
+=======
+            /*IWriteMessage message = GameMain.LuaCs.Networking.Start("RequestToServer");
+            message.WriteString("hi");
+            GameMain.LuaCs.Networking.Send(message);*/
+>>>>>>> Stashed changes
             await Task.Run(() =>
             {
                 try
                 {
+                    LuaCsSetup.PrintCsMessage("In start...");
                     BufferSound radioSound = new(
                         GameMain.SoundManager,
                         "RadioStream",
@@ -157,6 +181,7 @@ namespace BarotraumaRadio
                         }
                         PlaySound(itemSound.Type, character);
                     }
+                    LuaCsSetup.PrintCsMessage("Ok maybe...");
                 }
                 catch (Exception e)
                 {
@@ -185,9 +210,14 @@ namespace BarotraumaRadio
 
         public void CycleStations()
         {
+<<<<<<< Updated upstream
             currentStationIndex = GetNextStationIndex();
             currentStationUrl = radiostations[currentStationIndex].Url;
             UpdateConfig();
+=======
+            currentStationIndex = (currentStationIndex + 1) % radiostations.Length;
+
+>>>>>>> Stashed changes
             DisplayMessage($"Now playing {radiostations[currentStationIndex].Name}");
             SendStationToServer();
             ChangeStation();
@@ -243,6 +273,7 @@ namespace BarotraumaRadio
                         RadioEnabled = value != 0f;
                         lastLeverValue = value != 0f;
                     }
+                    LuaCsSetup.PrintCsMessage("Radio enabled " + RadioEnabled);
                     break;
                 }
                 case "switch_channel":
@@ -256,6 +287,7 @@ namespace BarotraumaRadio
                     break;
                 }
             }
+            doSync = true;
         }
 
         private void ClearParentFields(ActionType type)
@@ -285,6 +317,13 @@ namespace BarotraumaRadio
             StopSounds(type);
             ClearParentFields(type);
 #endif
+        }
+
+        public void ClientEventRead(IReadMessage msg, float sendingTime)
+        {
+            RadioEnabled = msg.ReadBoolean();
+            currentStationIndex = msg.ReadByte();
+            volume = msg.ReadRangedSingle(0f, 1f, 8);
         }
     }
 }

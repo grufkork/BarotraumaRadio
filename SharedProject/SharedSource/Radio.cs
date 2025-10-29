@@ -3,7 +3,7 @@ using Barotrauma.Items.Components;
 using System.Reflection;
 using System.Text.Json;
 
-namespace BarotraumaRadio
+namespace BarotraumaRadio // Shared
 {
     public partial class Radio : ItemComponent
     {
@@ -23,16 +23,20 @@ namespace BarotraumaRadio
 
         private RadioItem[] radiostations =
         [
-            new("AniSonFM", "https://pool.anison.fm/AniSonFM(320)"),
-            new("truckers.fm", "http://radio.truckers.fm"),
-            new("radioparadise.com", "http://stream.radioparadise.com/flacm"),
-            new("somafm", "http://ice1.somafm.com/groovesalad-256-mp3"),
-            new("kexp", "http://kexp-mp3-128.streamguys1.com/kexp128.mp3"),
-            new("srg-ssr", "http://stream.srg-ssr.ch/m/rsj/mp3_128"),
-            new("ClassicFM", "http://media-ssl.musicradio.com/ClassicFM"),
-            new("radiocaroline", "http://sc5.radiocaroline.net:8040/stream"),
+            new("3gg", "http://3gg.se:8001/stream")
         ];
 
+<<<<<<< Updated upstream:SharedProject/SharedSource/Radio.cs
+=======
+        private int currentStationIndex = 0;
+
+        private float volume = 0.85f;
+
+        private bool radioEnabled = false;
+        private bool doSync = false;
+        private bool lastLeverValue = false;
+
+>>>>>>> Stashed changes:SharedProject/SharedProject/Radio.cs
         private Powered? powered;
 
         public Radio(Item item, ContentXElement element) : base(item, element)
@@ -52,6 +56,7 @@ namespace BarotraumaRadio
             component = item.GetComponent<Powered>();
             return component != null;
         }
+<<<<<<< Updated upstream:SharedProject/SharedSource/Radio.cs
 
         private void LoadFromFile()
         {
@@ -150,5 +155,7 @@ namespace BarotraumaRadio
 
             return "";
         }
+=======
+>>>>>>> Stashed changes:SharedProject/SharedProject/Radio.cs
     }
 }
