@@ -98,10 +98,10 @@ namespace BarotraumaRadio
                     {
                         serverSync = clientConfig.ServerSync;
                     }
-                    else
-                    {
-                        serverSync = false;
-                    }
+                }
+                else if (GameMain.Client is null)
+                {
+                    serverSync = false;
                 }
 #endif
 #if SERVER
