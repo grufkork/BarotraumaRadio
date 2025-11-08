@@ -77,12 +77,6 @@
 				<Affliction identifier="blunttrauma" strength="1" />
 				<Affliction identifier="stun" strength="0.2" />
 			</Attack>
-			<StatusEffect type="OnImpact" target="This" tags="next_station" setvalue="true">
-				<LuaHook name="radio.station" />
-			</StatusEffect>
-			<StatusEffect type="OnImpact" target="This" tags="change_volume" setvalue="true">
-				<LuaHook name="radio.volume" />
-			</StatusEffect>
 		</Projectile>
 		<CustomInterface drawhudwhenequipped="true">
 			<GuiFrame relativesize="0.2,0.15" anchor="Center" relativeoffset="0.0,0.15" style="ConnectionPanel" />
