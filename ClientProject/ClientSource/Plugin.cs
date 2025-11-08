@@ -20,26 +20,18 @@ namespace BarotraumaRadio
         {
             GameMain.LuaCs.Networking.Receive("ChangeStationFromServer", (object[] args) =>
             {
-                LuaCsSetup.PrintCsMessage("1");
                 IReadMessage message = (IReadMessage)args[0];
-                LuaCsSetup.PrintCsMessage("2");
                 RadioDataStruct dataStruct = INetSerializableStruct.Read<RadioDataStruct>(message);
-                LuaCsSetup.PrintCsMessage("3");
                 Item? item = Item.ItemList.FirstOrDefault(serverItem => serverItem.ID == dataStruct.RadioID);
-                LuaCsSetup.PrintCsMessage("4");
                 if (item == null)
                     return;
-                LuaCsSetup.PrintCsMessage("5");
                 ItemComponent? component = item.Components.FirstOrDefault(c => c is Radio);
-                LuaCsSetup.PrintCsMessage("6");
                 if (component != null && component is Radio radioComponent && radioComponent.ServerSync)
                 {
-                    LuaCsSetup.PrintCsMessage("7");
                     if (radioComponent.currentStationUrl == dataStruct.ParamValue)
                     {
                         return;
                     }
-                    LuaCsSetup.PrintCsMessage("8");
                     radioComponent.currentStationUrl = dataStruct.ParamValue!;
                     radioComponent.ChangeStation();
                 }
