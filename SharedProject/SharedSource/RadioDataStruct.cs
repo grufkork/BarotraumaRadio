@@ -18,5 +18,24 @@ namespace BarotraumaRadio
         public RadioDataStruct()
         {
         }
-    };
+    }
+
+    public class PlayDataStruct : INetSerializableStruct
+    {
+        [NetworkSerialize]
+        public int? RadioID;
+        [NetworkSerialize]
+        public bool Playing;
+
+        public PlayDataStruct(int radioID, bool playing)
+        {
+            RadioID = radioID;
+            Playing = playing;
+        }
+
+        public PlayDataStruct()
+        {
+            Playing = false;
+        }
+    }
 }

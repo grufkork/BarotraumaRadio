@@ -37,6 +37,27 @@ namespace BarotraumaRadio
                 }
             });
 
+            GameMain.LuaCs.Networking.Receive("SetStateFromServer", (object[] args) =>
+            {
+                GameMain.LuaCs.PrintMessage("Received SetStateFromServer");
+                IReadMessage message = (IReadMessage)args[0];
+                PlayDataStruct dataStruct = INetSerializableStruct.Read<PlayDataStruct>(message);
+                Item? item = Item.ItemList.FirstOrDefault(serverItem => serverItem.ID == dataStruct.RadioID);
+                if (item == null)
+                    return;
+                ItemComponent? component = item.Components.FirstOrDefault(c => c is Radio);
+                if (component != null && component is Radio radioComponent && radioComponent.ServerSync)
+                {
+                    if(radioComponent.RadioEnabled == dataStruct.Playing)
+                    {
+                        GameMain.LuaCs.PrintMessage("Radio state already set to " + dataStruct.Playing);
+                        return;
+                    }
+                    radioComponent.RadioEnabled = dataStruct.Playing;
+                }
+                GameMain.LuaCs.PrintMessage("Radio state set to " + dataStruct.Playing);
+            });
+
             GameMain.LuaCs.Networking.Receive("SendStringFromServer", (object[] args) =>
             {
                 IReadMessage message = (IReadMessage)args[0];

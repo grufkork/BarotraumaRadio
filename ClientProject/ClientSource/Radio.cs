@@ -17,7 +17,7 @@ namespace BarotraumaRadio
             }
             set
             {
-                if (GameMain.Client is not null)
+                if (GameMain.Client is not null && GameMain.IsMultiplayer)
                 {
                     serverSync = value;
                 }
@@ -50,7 +50,7 @@ namespace BarotraumaRadio
             { 
                 return radioEnabled; 
             }
-            private set
+            set
             {
                 if (powered == null)
                 {
@@ -66,6 +66,7 @@ namespace BarotraumaRadio
                 if ((!powered!.HasPower || !value) && radioEnabled)
                 {
                     radioEnabled = false;
+                    DisplayMessage($"Turned Off");
                     Stop();
                 }
                 if (radioEnabled == value || !powered.HasPower)
@@ -73,6 +74,7 @@ namespace BarotraumaRadio
                     return;
                 }
                 radioEnabled = value;
+                DisplayMessage($"Turned On");
                 PlayAsync();
             }
         }
@@ -103,6 +105,7 @@ namespace BarotraumaRadio
 
         private void SendStationToServer()
         {
+            GameMain.LuaCs.PrintMessage("Sending station to server: " + currentStationUrl + " sync is " + ServerSync);
             if (ServerSync)
             {
 
@@ -228,7 +231,18 @@ namespace BarotraumaRadio
 
         public void ChangeState()
         {
+            GameMain.LuaCs.PrintMessage("Toggling state from client");
             RadioEnabled = !RadioEnabled;
+            GameMain.LuaCs.PrintMessage("Sync? " + ServerSync);
+            if (ServerSync) 
+            {
+                GameMain.LuaCs.Networking.Start("SetStateFromClient");
+                IWriteMessage message = GameMain.LuaCs.Networking.Start("SetStateFromClient");
+                INetSerializableStruct dataStruct = new PlayDataStruct(item.ID, RadioEnabled);
+                dataStruct.Write(message);
+                GameMain.LuaCs.Networking.Send(message);
+                GameMain.LuaCs.PrintMessage("State toggled to " + RadioEnabled);
+            }
         }
 
         public override void ReceiveSignal(Signal signal, Connection connection)
@@ -238,11 +252,7 @@ namespace BarotraumaRadio
             {
                 case "set_state":
                 {
-                    if (lastLeverValue != (value != 0f))
-                    {
-                        RadioEnabled = value != 0f;
-                        lastLeverValue = value != 0f;
-                    }
+                    ChangeState();
                     break;
                 }
                 case "switch_channel":
